@@ -9,6 +9,7 @@ FROM rust:1.89-bookworm AS backend-build
 WORKDIR /app
 COPY backend/Cargo.toml ./backend/Cargo.toml
 COPY backend/src/ ./backend/src/
+COPY backend/migrations/ ./backend/migrations/
 RUN cargo build --release --manifest-path backend/Cargo.toml
 
 FROM debian:bookworm-slim AS runtime
