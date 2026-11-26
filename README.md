@@ -21,7 +21,7 @@ Aplicación web privada 1:1 para que dos personas creen una cuenta, se encuentre
 
 ## Estado de entrega
 
-El frontend de producción compila localmente. El backend, el despliegue actualizado y una conversación/llamada entre dos cuentas deben quedar verificados en CI y Railway antes de presentar el enlace como listo. Consultá [`docs/DEPLOY.md`](docs/DEPLOY.md) para completar las variables y hacer la prueba de dos usuarios.
+GitHub Actions verificó el backend (pruebas y binario release) y el frontend (TypeScript y build) en el commit desplegado en Railway. Falta la prueba manual entre dos cuentas y dos redes; seguí [`docs/DEPLOY.md`](docs/DEPLOY.md). Los mensajes se guardan en MySQL y viajan por HTTPS/WebSocket, pero esta versión no tiene cifrado de extremo a extremo: administradores con acceso al servidor o la base podrían leerlos.
 
 ## Puesta en marcha en Railway
 
