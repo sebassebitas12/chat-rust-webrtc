@@ -31,6 +31,10 @@ El backend usa esa API token para pedir credenciales de corta duración; el nave
 6. Con ambas sesiones abiertas, inicien una llamada, acepten en el otro dispositivo, prueben silencio y finalización.
 7. Repitan con ambas personas en redes distintas. Si no conecta, revisen los logs del servicio y configuren Cloudflare TURN.
 
+## Alcance de privacidad
+
+Las contraseñas se almacenan con hash Argon2 y las sesiones usan cookies `HttpOnly`/`Secure`. Los mensajes y perfiles se guardan en MySQL y se protegen durante el transporte por HTTPS/WSS; no hay cifrado de extremo a extremo. El servicio que opera la aplicación y quienes tengan acceso a MySQL pueden acceder al contenido. Las llamadas de audio no se graban ni se almacenan.
+
 ## Variables
 
 | Variable | Requerida | Uso |
