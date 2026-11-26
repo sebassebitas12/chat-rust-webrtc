@@ -34,8 +34,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, label:focus-within {
 }
 .topbar { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 800; letter-spacing: .16em; }
-.brand-mark { display: grid; width: 34px; height: 34px; place-items: center; color: #edf0e8; }
-.brand-mark svg { width: 100%; height: 100%; }
+.page-shell .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; color: #edf0e8; }
+.page-shell .brand-mark svg { width: 100%; height: 100%; }
 .brand-divider { width: 1px; height: 16px; margin: 0 3px; background: var(--line); }
 .brand-caption, .service-indicator, .topbar-login, .eyebrow, .feature-number, .feature-detail, .card-kicker, .card-step, .field-label, .avatar-hint, .page-footer, .diagram-label {
   font-family: var(--mono);

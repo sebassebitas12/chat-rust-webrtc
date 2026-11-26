@@ -7,10 +7,16 @@ description = "Backend HTTP base para chat privado 1:1"
 
 [dependencies]
 argon2 = "0.5.3"
-axum = "0.8"
+axum = { version = "0.8", features = ["multipart", "ws"] }
 dotenvy = "0.15.7"
 email_address = "0.2.10"
+futures-util = "0.3"
+hex = "0.4"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
 sqlx = { version = "0.8.6", default-features = false, features = ["macros", "migrate", "mysql", "runtime-tokio-rustls"] }
-tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
-tower-http = { version = "0.6", features = ["fs"] }
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+tower-http = { version = "0.6", features = ["fs", "set-header"] }

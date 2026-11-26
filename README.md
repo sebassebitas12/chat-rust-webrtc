@@ -1,30 +1,51 @@
 # Chat Rust WebRTC
 
-Aplicación web de chat privado 1:1 con perfiles, contactos por ID único, mensajes y llamadas de voz en tiempo real.
+Aplicación web privada 1:1 para que dos personas creen una cuenta, se encuentren por ID, acepten el contacto, conversen y hagan llamadas de voz.
 
 ## Stack
 
-- **Frontend:** React 19, TypeScript y Vite 8.
-- **Backend:** Rust, Axum y Tokio.
-- **Datos:** MySQL local y MySQL en Railway.
-- **Tiempo real:** WebSocket para presencia y señalización; WebRTC para audio.
-- **Fotos:** almacenamiento local en desarrollo y Railway Bucket en producción.
+- **Frontend:** React 19, TypeScript y Vite 8 en `frontend/`.
+- **Backend:** Rust, Axum y Tokio en `backend/`.
+- **Persistencia:** MySQL mediante SQLx y migraciones versionadas.
+- **Tiempo real:** WebSocket para presencia, mensajes y señalización; WebRTC para audio.
+- **Despliegue:** Docker multietapa en Railway; Axum sirve la app React y la API desde el mismo dominio.
 
-## Estado
+## Funciones incluidas
 
-La pantalla inicial y el servidor Axum están desplegados. El registro ya crea una cuenta en MySQL, guarda la contraseña como hash Argon2 y devuelve el ID público. El inicio de sesión, las sesiones, el guardado de fotos, los contactos, el chat y las llamadas todavía están pendientes.
+- Registro e inicio/cierre de sesión con cookie `HttpOnly`; contraseñas con hash Argon2.
+- ID público único para agregar personas sin mostrar correos.
+- Solicitudes de contacto con aceptación o rechazo.
+- Mensajes privados persistentes, historial reciente, presencia y vista previa.
+- Foto opcional de perfil: JPG, PNG o WebP de hasta 5 MB; se valida, reduce y almacena en MySQL.
+- Llamadas de audio 1:1, permiso de micrófono, aceptación/rechazo, silencio y colgar.
 
-## Alcance inicial
+## Estado de entrega
 
-- Registro, inicio de sesión y perfil con foto.
-- ID público para encontrar personas.
-- Solicitud de contacto que la otra persona puede aceptar o rechazar.
-- Chat privado y llamada de voz 1:1 entre contactos.
+El frontend de producción compila localmente. El backend, el despliegue actualizado y una conversación/llamada entre dos cuentas deben quedar verificados en CI y Railway antes de presentar el enlace como listo. Consultá [`docs/DEPLOY.md`](docs/DEPLOY.md) para completar las variables y hacer la prueba de dos usuarios.
 
-El servicio web se construye desde el `Dockerfile` de la raíz. React y Rust siguen separados en `frontend/` y `backend/`; Axum sirve los archivos compilados de React y `/health` reporta el estado del servidor.
+## Puesta en marcha en Railway
 
-Para el desarrollo local, copiá `.env.example` a `.env` y configurá `DATABASE_URL` con tu MySQL. En Railway, agregá `DATABASE_URL` como referencia a la variable `MYSQL_URL` del servicio MySQL; no pegues credenciales en Git ni en el chat. Si no configurás la variable, el sitio inicia sin base y `/health` indica `not_configured`.
+El repositorio usa el `Dockerfile` de la raíz y requiere una base MySQL conectada mediante `DATABASE_URL`. Al iniciar, el backend aplica las migraciones. Railway provee `RAILWAY_PUBLIC_DOMAIN`; el servidor lo usa para validar el origen y activar cookies seguras automáticamente. Si cambiás a un dominio personalizado, configurá `APP_BASE_URL=https://tu-dominio`.
 
-## Primer endpoint
+Para que las llamadas funcionen con más tipos de NAT y redes, configurá los secretos TURN opcionales indicados en [`docs/DEPLOY.md`](docs/DEPLOY.md). Sin ellos se usa STUN y algunas combinaciones de redes no lograrán conectar audio.
 
-`POST /api/v1/auth/register` recibe un JSON con `display_name`, `email` y `password`. Responde `201` con `public_id` y `display_name`; no devuelve el correo ni el hash. La selección de foto todavía es una vista previa: el archivo no se guarda en esta etapa.
+## Desarrollo local
+
+1. Instalá Rust estable (1.89 o superior), Node.js 24 y MySQL 8.
+2. Creá una base vacía y copiá `.env.example` a `.env`; completá `DATABASE_URL`.
+3. En una terminal ejecutá `cargo run --manifest-path backend/Cargo.toml` desde la raíz.
+4. En otra terminal ejecutá `npm ci` y `npm run dev` desde `frontend/`.
+
+Vite reenvía `/api` y `/api/v1/realtime` a `http://127.0.0.1:8080`. El endpoint `/health` indica si el backend y MySQL están conectados.
+
+## Carpetas
+
+```text
+frontend/       React, TypeScript, estilos y cliente de API
+backend/        API Rust, WebSocket y migraciones MySQL
+docs/           arquitectura e instrucciones de despliegue
+mockups/        referencias visuales aprobadas
+Dockerfile      construcción de frontend y backend para Railway
+```
+
+La llamada no se graba ni se almacena. Mensajes y cuentas sí se guardan en MySQL. Este MVP es un solo servicio y el estado de presencia/señalización vive en memoria; mantené una sola réplica del servicio web.
