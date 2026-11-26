@@ -1,6 +1,16 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 
 type AccountMode = 'create' | 'login';
+type CreatedAccount = { publicId: string; photoPending: boolean };
+
+function isRegistrationResponse(value: unknown): value is { public_id: string; display_name: string } {
+  return typeof value === 'object'
+    && value !== null
+    && 'public_id' in value
+    && typeof value.public_id === 'string'
+    && 'display_name' in value
+    && typeof value.display_name === 'string';
+}
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -40,6 +50,9 @@ export default function App() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState('');
   const [notice, setNotice] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [createdAccount, setCreatedAccount] = useState<CreatedAccount | null>(null);
+  const [copyNotice, setCopyNotice] = useState('');
 
   useEffect(() => {
     if (!avatar) {
@@ -77,15 +90,79 @@ export default function App() {
     setAvatar(file);
   }
 
-  function submitAccount(event: FormEvent<HTMLFormElement>) {
+  async function submitAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotice('El formulario visual ya está listo; estamos conectando el servicio de cuentas.');
+    if (mode === 'login') {
+      setNotice('El inicio de sesión se habilitará en la siguiente etapa.');
+      return;
+    }
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const photoPending = avatar !== null;
+    const payload = {
+      display_name: String(formData.get('displayName') ?? '').trim(),
+      email: String(formData.get('email') ?? '').trim(),
+      password: String(formData.get('password') ?? ''),
+    };
+
+    setSubmitting(true);
+    setNotice('Creando tu cuenta…');
+    setAvatarError('');
+
+    try {
+      const response = await fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result: unknown = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message = typeof result === 'object'
+          && result !== null
+          && 'message' in result
+          && typeof result.message === 'string'
+          ? result.message
+          : 'No se pudo crear la cuenta. Intentá de nuevo.';
+        setNotice(message);
+        return;
+      }
+
+      if (!isRegistrationResponse(result)) {
+        setNotice('El servidor respondió de una forma inesperada. Intentá de nuevo.');
+        return;
+      }
+
+      setCreatedAccount({ publicId: result.public_id, photoPending });
+      setCopyNotice('');
+      setNotice('');
+      form.reset();
+      setAvatar(null);
+    } catch {
+      setNotice('No se pudo conectar con el servidor. Revisá tu conexión e intentá de nuevo.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function changeMode(nextMode: AccountMode) {
     setMode(nextMode);
     setNotice('');
     setAvatarError('');
+    setCreatedAccount(null);
+    setCopyNotice('');
+  }
+
+  async function copyPublicId() {
+    if (!createdAccount) return;
+
+    try {
+      await navigator.clipboard.writeText(createdAccount.publicId);
+      setCopyNotice('ID copiado.');
+    } catch {
+      setCopyNotice('No se pudo copiar automáticamente; copiá el ID manualmente.');
+    }
   }
 
   return (
@@ -136,9 +213,11 @@ export default function App() {
             <span className="card-kicker">TU ESPACIO</span>
             <span className="card-step">{mode === 'create' ? '01 / 02' : '02 / 02'}</span>
           </div>
-          <h2>{mode === 'create' ? 'Empezá por vos.' : 'Qué bueno verte.'}</h2>
+          <h2>{createdAccount ? 'Tu ID está listo.' : mode === 'create' ? 'Empezá por vos.' : 'Qué bueno verte.'}</h2>
           <p className="card-intro">
-            {mode === 'create'
+            {createdAccount
+              ? 'Compartí este código para que otras personas puedan encontrarte.'
+              : mode === 'create'
               ? 'Creá tu cuenta; después te damos un ID para compartir.'
               : 'Entrá para volver a tus conversaciones.'}
           </p>
@@ -148,7 +227,21 @@ export default function App() {
             <button className={mode === 'login' ? 'mode-tab active' : 'mode-tab'} type="button" role="tab" aria-selected={mode === 'login'} onClick={() => changeMode('login')}>Ingresar</button>
           </div>
 
-          <form className="account-form" onSubmit={submitAccount}>
+          {createdAccount ? (
+            <div className="registration-success" role="status">
+              <span className="success-label">CUENTA CREADA</span>
+              <div className="public-id-row">
+                <code>{createdAccount.publicId}</code>
+                <button className="copy-id-button" type="button" onClick={copyPublicId}>Copiar ID</button>
+              </div>
+              <p className="registration-note">
+                El inicio de sesión todavía no está conectado.
+                {createdAccount.photoPending && ' La foto que elegiste no se guardó; conectaremos su almacenamiento después.'}
+              </p>
+              {copyNotice && <p className="form-notice" aria-live="polite">{copyNotice}</p>}
+            </div>
+          ) : (
+          <form className="account-form" onSubmit={submitAccount} aria-busy={submitting}>
             {mode === 'create' && (
               <>
                 <div className="avatar-field">
@@ -162,7 +255,7 @@ export default function App() {
                   <div className="avatar-instructions">
                     <span className="field-label">FOTO DE PERFIL <span>OPCIONAL</span></span>
                     <label htmlFor="avatar-file" className="avatar-action">{avatar ? 'Cambiar foto' : 'Elegir una foto'}</label>
-                    <span className="avatar-hint">JPG, PNG o WebP · hasta 5 MB</span>
+                    <span className="avatar-hint">JPG, PNG o WebP · guardado en la siguiente etapa</span>
                   </div>
                 </div>
                 {avatarError && <p className="field-message error" role="alert">{avatarError}</p>}
@@ -183,16 +276,17 @@ export default function App() {
               <input type="password" name="password" autoComplete={mode === 'create' ? 'new-password' : 'current-password'} placeholder="Mínimo 12 caracteres" minLength={12} maxLength={128} required />
             </label>
 
-            <button className="submit-button" type="submit" disabled>
-              {mode === 'create' ? 'Crear mi cuenta' : 'Ingresar'}
+            <button className="submit-button" type="submit" disabled={submitting || mode === 'login'}>
+              {submitting ? 'Creando cuenta…' : mode === 'create' ? 'Crear mi cuenta' : 'Ingresar'}
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
-            <p className="form-notice" aria-live="polite">{notice || 'El acceso se habilita cuando terminemos de conectar las cuentas.'}</p>
+            <p className="form-notice" aria-live="polite">{notice || (mode === 'create' ? 'Tu contraseña no se guarda en texto claro.' : 'El inicio de sesión se habilitará en la siguiente etapa.')}</p>
           </form>
+          )}
 
           <div className="card-bottom">
             <span className="lock-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" strokeWidth="1.2"/></svg></span>
-            <span>Tu foto y tus mensajes se controlan desde tu cuenta.</span>
+            <span>El ingreso y el guardado de fotos se conectarán después.</span>
           </div>
         </section>
       </section>

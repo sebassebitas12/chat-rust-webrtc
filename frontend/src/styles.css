@@ -106,9 +106,20 @@ h1 em { color: var(--citron); font-style: normal; }
 .field-group input::placeholder { color: #65727e; }
 .field-group input:focus { border-color: rgba(199, 243, 107, .62); background: rgba(11, 16, 23, .78); }
 .submit-button { display: flex; height: 46px; align-items: center; justify-content: space-between; margin-top: 3px; padding: 0 15px; border: 1px solid rgba(199, 243, 107, .25); border-radius: 8px; color: #d7e0ce; background: rgba(110, 137, 64, .24); font-size: 12px; font-weight: 700; }
+.submit-button:not(:disabled) { cursor: pointer; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+.submit-button:not(:disabled):hover { border-color: rgba(199, 243, 107, .56); background: rgba(110, 137, 64, .38); }
+.submit-button:not(:disabled):active { transform: translateY(1px); }
 .submit-button svg { width: 18px; height: 18px; color: var(--citron); }
 .submit-button:disabled { cursor: not-allowed; opacity: .65; }
 .form-notice { min-height: 27px; margin: -7px 0 0; color: #78858f; font-size: 10px; line-height: 1.45; }
+.registration-success { display: grid; gap: 12px; padding: 17px; border: 1px solid rgba(199, 243, 107, .2); border-radius: 11px; background: linear-gradient(135deg, rgba(199, 243, 107, .07), rgba(15, 21, 27, .42)); }
+.success-label { color: var(--citron); font-family: var(--mono); font-size: 9px; letter-spacing: .12em; }
+.public-id-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.public-id-row code { color: #edf3e6; font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: .15em; }
+.copy-id-button { min-height: 34px; padding: 0 11px; border: 1px solid rgba(199, 243, 107, .28); border-radius: 7px; color: var(--citron); background: rgba(199, 243, 107, .07); font-size: 10px; font-weight: 650; cursor: pointer; }
+.copy-id-button:hover { border-color: rgba(199, 243, 107, .6); background: rgba(199, 243, 107, .13); }
+.registration-note { margin: 0; color: #9aa5a8; font-size: 10px; line-height: 1.55; }
+.registration-success .form-notice { min-height: 0; margin: 0; color: var(--citron); }
 .field-message { margin: -9px 0 -4px; font-size: 10px; }
 .field-message.error { color: var(--coral); }
 .card-bottom { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; padding-top: 15px; border-top: 1px solid var(--line); color: #74818b; font-size: 9px; line-height: 1.55; }

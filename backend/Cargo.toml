@@ -6,8 +6,10 @@ rust-version = "1.89"
 description = "Backend HTTP base para chat privado 1:1"
 
 [dependencies]
+argon2 = "0.5.3"
 axum = "0.8"
 dotenvy = "0.15.7"
+email_address = "0.2.10"
 serde = { version = "1", features = ["derive"] }
 sqlx = { version = "0.8.6", default-features = false, features = ["macros", "migrate", "mysql", "runtime-tokio-rustls"] }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
