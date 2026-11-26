@@ -5,7 +5,7 @@ pub mod social;
 use axum::{
     Json, Router,
     extract::{DefaultBodyLimit, State},
-    http::{HeaderMap, StatusCode, header},
+    http::{HeaderMap, HeaderValue, StatusCode, header},
     response::{IntoResponse, Response},
     routing::{delete, get, patch, post},
 };
@@ -190,19 +190,19 @@ pub fn router(state: AppState) -> Router {
         .layer(DefaultBodyLimit::max(5 * 1024 * 1024 + 64 * 1024))
         .layer(SetResponseHeaderLayer::if_not_present(
             axum::http::header::CONTENT_SECURITY_POLICY,
-            "default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self' ws: wss:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'".parse().expect("valid content security policy"),
+            HeaderValue::from_static("default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self' ws: wss:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"),
         ))
         .layer(SetResponseHeaderLayer::if_not_present(
             axum::http::header::X_CONTENT_TYPE_OPTIONS,
-            "nosniff".parse().expect("valid header"),
+            HeaderValue::from_static("nosniff"),
         ))
         .layer(SetResponseHeaderLayer::if_not_present(
             axum::http::header::REFERRER_POLICY,
-            "strict-origin-when-cross-origin".parse().expect("valid header"),
+            HeaderValue::from_static("strict-origin-when-cross-origin"),
         ))
         .layer(SetResponseHeaderLayer::if_not_present(
             axum::http::HeaderName::from_static("permissions-policy"),
-            "microphone=(self)".parse().expect("valid header"),
+            HeaderValue::from_static("microphone=(self)"),
         ))
         .with_state(state)
 }
