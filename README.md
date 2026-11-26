@@ -2,17 +2,17 @@
 
 Aplicación web de chat privado 1:1 con perfiles, contactos por ID único, mensajes y llamadas de voz en tiempo real.
 
-## Stack previsto
+## Stack
 
-- **Frontend:** React, TypeScript y Vite.
+- **Frontend:** React 19, TypeScript y Vite 8.
 - **Backend:** Rust, Axum y Tokio.
 - **Datos:** MySQL local y MySQL en Railway.
 - **Tiempo real:** WebSocket para presencia y señalización; WebRTC para audio.
-- **Archivos:** fotos de perfil locales durante el desarrollo y almacenamiento compatible con S3 en Railway.
+- **Fotos:** almacenamiento local en desarrollo y Railway Bucket en producción.
 
 ## Estado
 
-En planificación. El repositorio todavía no contiene el código de la aplicación. El nombre visual del producto también está pendiente.
+Primera base de frontend y backend en preparación. El formulario de cuenta es solo interfaz; registro, MySQL, contactos, chat y llamadas aún deben implementarse.
 
 ## Alcance inicial
 
@@ -21,3 +21,4 @@ En planificación. El repositorio todavía no contiene el código de la aplicaci
 - Solicitud de contacto que la otra persona puede aceptar o rechazar.
 - Chat privado y llamada de voz 1:1 entre contactos.
 
+El servicio web se construye desde el `Dockerfile` de la raíz. React y Rust siguen separados en `frontend/` y `backend/`; Axum sirve los archivos compilados de React y `/health` reporta el estado del servidor.
