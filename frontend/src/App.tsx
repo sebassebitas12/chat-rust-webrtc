@@ -704,7 +704,7 @@ function App() {
           <section className="messages" aria-label={`Conversación con ${selectedContact.display_name}`}>
             <div className="thread-inner">
               <div className="date-separator"><span>MENSAJES PRIVADOS</span></div>
-              {messageLoading ? <div className="thread-state">Cargando conversación…</div> : messages.length === 0 ? <div className="thread-empty"><span className="thread-empty-mark"><Icon name="chat" /></span><h3>Acá empieza la conversación.</h3><p>Solo vos y {selectedContact.display_name} pueden ver estos mensajes.</p></div> : messages.map((message) => <article className={`message-group ${message.mine ? 'mine' : ''}`} key={message.id}>
+              {messageLoading ? <div className="thread-state">Cargando conversación…</div> : messages.length === 0 ? <div className="thread-empty"><span className="thread-empty-mark"><Icon name="chat" /></span><h3>Acá empieza la conversación.</h3><p>El historial se guarda para que puedan volver a leerlo.</p></div> : messages.map((message) => <article className={`message-group ${message.mine ? 'mine' : ''}`} key={message.id}>
                 <Avatar account={message.mine ? account : selectedContact} className="message-avatar" />
                 <div className="message-content"><div className="message-heading"><span className={`message-author ${message.mine ? 'self' : ''}`}>{message.mine ? 'Vos' : message.sender_name}</span><time className="message-time" dateTime={message.sent_at}>{formatTime(message.sent_at)}</time></div><p className="message-text">{message.body}</p></div>
               </article>)}
